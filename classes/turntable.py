@@ -11,7 +11,7 @@ class Turntable:
 
         self.running = False
         self.direction = 1
-        self.delay = 0.001
+        self.delay = 0.002
 
         self.position = 0
         self.fullRotationPosition = 3072
