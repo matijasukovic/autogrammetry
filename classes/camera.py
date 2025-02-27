@@ -14,12 +14,12 @@ class Camera:
         
         self.picamera.configure(self.still_config)
 
-        self.picamera.set_controls({"ExposureTime": 40000, "AnalogueGain": 1.0, "Contrast": 1.2, "Sharpness": 2})
         print(self.picamera.camera_controls)
+        self.picamera.set_controls({'ExposureTime': 34000, 'AnalogueGain': 1.0, 'Contrast': 1.3, 'Sharpness': 1.5, 'Saturation': 1.2})
 
         self.picamera.start()
 
-        self.savedImage_filename = 'top'
+        self.savedImage_filename = 'bottom'
         self.savedImage_index = 0
         self.savedImage_extension = '.png'
 
