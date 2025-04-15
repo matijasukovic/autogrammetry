@@ -28,7 +28,7 @@ servo = Servo(
 )
 
 speed = 0
-increment = 0.24
+increment = 0.8
 
 def on_press(key):
     global speed
@@ -59,9 +59,9 @@ def main():
 
     # place camera to lowest position
     servo.value -= increment
-    sleep(7)
+    sleep(4)
 
-    servoDelays_perStep = [1.9, 2.1, 2.2, 2.6]
+    servoDelays_perStep = [0.3, 1.2, 1.2, 1.2]
     stepperSteps_perStep = 48
 
     for i in range(len(servoDelays_perStep)):
@@ -71,26 +71,26 @@ def main():
         servo.value = 0
         sleep(1)
 
-        for j in range(0, turntable.fullRotationPosition, stepperSteps_perStep):
-            while turntable.running:
-                img = camera.capture()
+        # for j in range(0, turntable.fullRotationPosition, stepperSteps_perStep):
+        #     while turntable.running:
+        #         img = camera.capture()
                 
-                cv2.namedWindow('Preview', cv2.WINDOW_NORMAL)
-                cv2.imshow('Preview', img)
+        #         cv2.namedWindow('Preview', cv2.WINDOW_NORMAL)
+        #         cv2.imshow('Preview', img)
 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+        #         if cv2.waitKey(1) & 0xFF == ord('q'):
+        #             break
             
 
-            sleep(0.1)
-            camera.captureAndSave(raw=True, output_dir="/media/sukovicm/Matija_T9/test/top")
+        #     sleep(0.1)
+        #     camera.captureAndSave(raw=True, output_dir="/media/sukovicm/Matija_T9/test/top")
 
-            if j != turntable.fullRotationPosition:
-                turntable.startMotorStep(number_of_steps=stepperSteps_perStep, direction=1)
-            else:
-                # End of a cycle, move turntable slightly so that the next cycle is slightly shifted to the side
-                shiftStep = math.floor(stepperSteps_perStep / len(servoDelays_perStep))
-                turntable.startMotorStep(number_of_steps=shiftStep)
+        #     if j != turntable.fullRotationPosition:
+        #         turntable.startMotorStep(number_of_steps=stepperSteps_perStep, direction=1)
+        #     else:
+        #         # End of a cycle, move turntable slightly so that the next cycle is slightly shifted to the side
+        #         shiftStep = math.floor(stepperSteps_perStep / len(servoDelays_perStep))
+        #         turntable.startMotorStep(number_of_steps=shiftStep)
         
     listener.stop()
     sleep(1)

@@ -26,7 +26,7 @@ servo = Servo(
 )
 
 speed = 0
-increment = 0.24
+increment = 0.8
 def on_press(key):
     global speed
     global increment
