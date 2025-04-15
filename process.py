@@ -5,6 +5,7 @@ from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 from pynput.keyboard import Key, Listener
 from time import sleep
+import math
 
 # Camera setup
 camera = Camera()
@@ -60,14 +61,17 @@ def main():
     servo.value -= increment
     sleep(7)
 
-    for i in range(3):
+    servoDelays_perStep = [1.9, 2.1, 2.2, 2.6]
+    stepperSteps_perStep = 48
+
+    for i in range(len(servoDelays_perStep)):
         # lift camera
         servo.value = increment
-        sleep(3.7 if i != 0 else 1.9)
+        sleep(servoDelays_perStep[i])
         servo.value = 0
         sleep(1)
 
-        for j in range(0, turntable.fullRotationPosition, 24):
+        for j in range(0, turntable.fullRotationPosition, stepperSteps_perStep):
             while turntable.running:
                 img = camera.capture()
                 
@@ -79,21 +83,17 @@ def main():
             
 
             sleep(0.1)
-            img = camera.capture()
-            camera.saveImage(img, output_dir="top")
-                
-            cv2.namedWindow('Preview', cv2.WINDOW_NORMAL)
-            cv2.imshow('Preview', img)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            camera.captureAndSave(raw=True, output_dir="/media/sukovicm/Matija_T9/test/top")
 
             if j != turntable.fullRotationPosition:
-                turntable.startMotorStep(number_of_steps=24, direction=1)
+                turntable.startMotorStep(number_of_steps=stepperSteps_perStep, direction=1)
+            else:
+                # End of a cycle, move turntable slightly so that the next cycle is slightly shifted to the side
+                shiftStep = math.floor(stepperSteps_perStep / len(servoDelays_perStep))
+                turntable.startMotorStep(number_of_steps=shiftStep)
         
-
-
     listener.stop()
+    sleep(1)
 
 if __name__ == '__main__':
     main()
