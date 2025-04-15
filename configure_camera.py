@@ -1,12 +1,12 @@
 import cv2
 from classes.camera import Camera
 from pynput.keyboard import Listener
+import numpy as np
 
-# Initialize camera
 camera = Camera()
 
 # Default camera settings
-controls = {'ExposureTime': 39000, 'AnalogueGain': 1.0, 'Contrast': 1.3, 'Sharpness': 1.5, 'Saturation': 1.3}
+controls = camera.custom_controls
 
 camera.picamera.set_controls(controls)
 
@@ -44,6 +44,14 @@ def on_press(key):
         controls["Saturation"] = max(controls["Saturation"] - 0.1, 0.0)
         camera.picamera.set_controls(controls) 
         print(f"Decreased Saturation: {controls}")
+    elif key.char == 'o':
+        controls["AwbMode"] = min(controls["AwbMode"] + 1, 7)
+        camera.picamera.set_controls(controls) 
+        print(f"Increased AwbMode: {controls}")
+    elif key.char == 'p':
+        controls["AwbMode"] = max(controls["AwbMode"] - 1, 0)
+        camera.picamera.set_controls(controls) 
+        print(f"Decreased AwbMode: {controls}")
     elif key.char == 'q':
         cv2.destroyAllWindows()
         camera.picamera.stop()
