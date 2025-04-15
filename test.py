@@ -27,7 +27,6 @@ servo = Servo(
 
 speed = 0
 increment = 0.24
-
 def on_press(key):
     global speed
     global increment
@@ -49,7 +48,7 @@ def on_press(key):
         else:
             turntable.startMotorContinuous(direction = -1)
     elif key == Key.space:
-        camera.captureAndSave()
+        camera.captureAndSave(raw=True)
 
 def main():
     listener = Listener(on_press=on_press)
