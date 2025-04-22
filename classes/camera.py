@@ -1,11 +1,14 @@
-from picamera2 import Picamera2, Preview
-from libcamera import controls
+from picamera2 import Picamera2
 import cv2
 import os
-from PIL import Image
+from classes.continuous_servo import ContinuousServo
 
 class Camera:
     def __init__(self):
+        self.servo = ContinuousServo(pin=17)
+        self.SERVO_UP_SPEED = 0.75
+        self.SERVO_DOWN_SPEED = -0.45
+
         self.picamera = Picamera2()
 
         self.still_config = self.picamera.create_still_configuration(
@@ -16,7 +19,6 @@ class Camera:
         
         self.picamera.configure(self.still_config)
 
-        print(self.picamera.camera_controls)
         self.picamera.set_controls(self.custom_controls)
 
         self.picamera.start()
@@ -49,6 +51,18 @@ class Camera:
 
         print('saved as: ' ,save_path) 
         self.savedImage_index += 1
+
+    def move(self, direction='up', duration=1):
+        match direction:
+            case 'up':
+                speed = self.SERVO_UP_SPEED
+            case 'down':
+                speed = self.SERVO_DOWN_SPEED
+            case _:
+                raise Exception('Invalid direction.')
+        
+        self.servo.setSpeed_forDuration(speed, duration)
+        return
 
     def stop(self):
         self.picamera.stop()
