@@ -1,6 +1,6 @@
 from gpiozero import OutputDevice
 from time import sleep
-import threading
+from threading import Thread, Event
 
 class Turntable:
     def __init__(self):
@@ -9,7 +9,7 @@ class Turntable:
         self.IN3 = OutputDevice(18)
         self.IN4 = OutputDevice(23)
 
-        self.running = False
+        self.running = Event()
         self.direction = 1
         self.delay = 0.002
 
@@ -43,7 +43,7 @@ class Turntable:
 
     def stepMotor(self, number_of_steps=24, direction=1):
         for _ in range(number_of_steps):
-            if not self.running:
+            if not self.running.is_set():
                 print('stepMotor action stopped externally')
                 return
             
@@ -57,26 +57,26 @@ class Turntable:
     def startMotorStep(self, number_of_steps=24, direction = 1):
         self.direction = direction
         
-        self.running = True
-        thread = threading.Thread(target = self.stepMotor, daemon = True, args=(number_of_steps, direction))
-        thread.start()
+        self.running.set()
+        process = Thread(target = self.stepMotor, daemon = True, args=(number_of_steps, direction))
+        process.start()
 
     def startMotorContinuous(self, direction = 1):
         self.direction = direction
         
-        if self.running:
+        if self.running.is_set():
             return
         
-        self.running = True
-        thread = threading.Thread(target = self.continuous, daemon = True)
+        self.running.set()
+        thread = Thread(target = self.continuous, daemon = True)
         thread.start()
 
     def stopMotor(self):
-        self.running = False
+        self.running.clear()
 
 
     def continuous(self):
-        while self.running:
+        while self.running.is_set():
             for step in (self.step_sequence if self.direction > 0 else reversed(self.step_sequence)):
                 self.setStep(*step)
                 sleep(self.delay)
