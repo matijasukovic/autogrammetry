@@ -1,6 +1,6 @@
 from gpiozero import Buzzer
 from time import sleep
-from threading import Thread
+from threading import Thread, Event
 
 class ActiveBuzzer:
     STEPS_WAITING = [
@@ -17,14 +17,11 @@ class ActiveBuzzer:
     def __init__(self, pin=26):
         self.buzzer = Buzzer(pin)
 
-        self.isPlaying = False
-
-        self.thread_playing = Thread(target = self.noiseLoop, daemon = True)
-        self.thread_playing.start()
+        self.isPlaying = Event()
 
     def executeSoundSequence(self, steps=STEPS_WAITING):
         for step in steps:
-            if not self.isPlaying:
+            if not self.isPlaying.is_set():
                 return
             
             if step.get('on'):
@@ -37,17 +34,16 @@ class ActiveBuzzer:
         self.buzzer.beep(on_time=0.05, off_time=0.05, n=1)
 
     def noiseLoop(self):
-        while True:
-            if self.isPlaying:
-                self.executeSoundSequence()
+        while self.isPlaying.is_set():
+            self.executeSoundSequence()
     
     def play(self):
-        print('play')
-        self.isPlaying = True
+        self.isPlaying.set()
+        thread = Thread(target = self.noiseLoop, daemon = True)
+        thread.start()
 
     def stop(self):
-        print('stop')
-        self.isPlaying = False
+        self.isPlaying.clear()
         self.buzzer.off()
         
     
