@@ -21,7 +21,7 @@ def main():
         sleep(1)
 
         for j in range(0, turntable.fullRotationPosition, stepperSteps_perStep):
-            while turntable.running:
+            while turntable.running.is_set():
                 img = camera.capture()
                 
                 cv2.namedWindow('Preview', cv2.WINDOW_NORMAL)
