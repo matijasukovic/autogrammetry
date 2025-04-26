@@ -14,9 +14,9 @@ def on_press(key):
     global increment
 
     if key == Key.up:
-        camera.move('up', duration=1)
+        camera.move('up', duration=0.5)
     elif key == Key.down:
-        camera.move('down', duration=1)
+        camera.move('down', duration=0.5)
     elif key == Key.left:
         if turntable.running and turntable.direction == -1:
             turntable.stopMotor()
