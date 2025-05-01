@@ -2,6 +2,9 @@ from picamera2 import Picamera2
 import cv2
 import os
 from classes.continuous_servo import ContinuousServo
+import exiftool
+from multiprocessing import Process, Queue
+from datetime import datetime
 
 class Camera:
     def __init__(self):
@@ -9,28 +12,36 @@ class Camera:
         self.SERVO_UP_SPEED = 0.75
         self.SERVO_DOWN_SPEED = -0.45
 
+        self.metadata = {
+            "EXIF:Manufacturer": "RaspberryPi",
+            "EXIF:Model": "Raspberry Pi HQ Camera",
+            "EXIF:UserComment": "Shot with Autogrammetry v1.0",
+            "EXIF:Flash": "0"
+        }
+
         self.picamera = Picamera2()
 
         self.still_config = self.picamera.create_still_configuration(
             raw={"size": (4056, 3040)},
         )
-
         self.custom_controls = {'ExposureTime': 19000, 'AnalogueGain': 1.0, 'Contrast': 1.0, 'Sharpness': 1.0, 'Saturation': 1.0, 'AwbMode': 0}
         
         self.picamera.configure(self.still_config)
-
         self.picamera.set_controls(self.custom_controls)
 
         self.picamera.start()
 
-        self.savedImage_filename = 'top'
+        self.savedImage_filename = 'image'
         self.savedImage_index = 0
         self.savedImage_extension = '.png'
 
+        self.metadataEditQueue = Queue()
+        self.metadataEditWorker = Process(target=self.exif_worker, args=(self.metadataEditQueue, self.metadata), daemon=True)
+    
     def capture(self):
         img = self.picamera.capture_array()
         return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    
+
     def captureAndSave(self, output_dir='.', raw=False):
         extension = '.dng' if raw else self.savedImage_extension
             
@@ -38,19 +49,11 @@ class Camera:
         save_path = os.path.join(output_dir, filename)
 
         self.picamera.capture_file(save_path, 'raw' if raw else None) 
+
         print('saved as: ' ,save_path) 
 
         self.savedImage_index += 1
-
-    def saveImage(self, image, output_dir='.'):
-        filename = self.savedImage_filename + '_' + str(self.savedImage_index) + self.savedImage_extension
-        save_path = os.path.join(output_dir, filename)
-
-        img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        cv2.imwrite(save_path, image)
-
-        print('saved as: ' ,save_path) 
-        self.savedImage_index += 1
+        self.metadataEditQueue.put(save_path)
 
     def move(self, direction='up', duration=1):
         match direction:
@@ -66,3 +69,32 @@ class Camera:
 
     def stop(self):
         self.picamera.stop()
+
+    def setMetadata(self, metadata):
+        now = datetime.now()
+
+        copyrightHolder = metadata['EXIF:Copyright']
+        artist = metadata['EXIF:Artist']
+        if copyrightHolder:
+            metadata['EXIF:Copyright'] = "Copyright {0} {1}. All rights reserved.".format(now.year, copyrightHolder)
+        elif artist:
+            metadata['EXIF:Copyright'] = "Copyright {0} {1}. All rights reserved.".format(now.year, artist)
+
+        for key, value in metadata.items():
+            self.metadata[key] = value
+
+        self.metadataEditWorker.start()
+
+    def exif_worker(self, queue, metadata):
+        with exiftool.ExifTool() as et:
+
+            while True:
+                file_path = queue.get()
+
+                if file_path is None:
+                    break
+
+                metadata['EXIF:DateTimeOriginal'] = datetime.now().strftime("%Y:%m:%d %H:%M:%S")
+
+                args = [f"-{tag}={value}" for tag, value in metadata.items()]
+                et.execute(b"-overwrite_original", *args, file_path)
