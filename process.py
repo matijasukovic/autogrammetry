@@ -5,6 +5,9 @@ from gpiozero import Button
 from time import sleep
 import cv2
 from threading import Event
+import inquirer
+import subprocess
+
 
 # Camera setup
 camera = Camera()
@@ -26,7 +29,7 @@ def on_press():
 
 button.when_pressed = on_press
 
-steps_mine = [
+steps_simple = [
     {'action': 'move', 'direction': 'up', 'duration': 3.5},
     {'action': 'capture', 'amount': 32, 'rotation': 0.5},
     {'action': 'wait', 'beep': True},
@@ -101,7 +104,27 @@ steps_gdh = [
 def main():
     camera.move('down', duration=3.75)
 
-    for step in steps_gdh:
+    print('Welcome to Autogrammetry v1.0!')
+
+    scan_method = promptUser_scanMethod()
+
+    outputDirectory = promptUser_outputDirectory()
+
+    metadata = promptUser_metadata()
+    camera.setMetadata(metadata)
+    
+    print('Ready to start!')
+
+    match scan_method:
+        case 'Simple':
+            steps = steps_simple
+        case 'GDH':
+            steps = steps_gdh
+        case _:
+            raise Exception("I don't even remember how I got here")
+
+
+    for step in steps:
         match step.get('action'):
             case 'move':
                 camera.move(step.get('direction'), duration=step.get('duration'))
@@ -125,7 +148,7 @@ def main():
                             break
             
                     sleep(0.1)
-                    camera.captureAndSave(raw=True, output_dir="/media/sukovicm/Matija_T9/1 Euro liberte/images/dng")
+                    camera.captureAndSave(raw=True, output_dir=outputDirectory)
 
                     if stepperMotor_currentStep != stepperMotor_totalSteps:
                         turntable.startMotorStep(number_of_steps=stepperMotor_stepsPerImage, direction=1)
@@ -142,12 +165,74 @@ def main():
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break  
 
-                buzzer.bleep()
                 buttonEvent.clear()
 
                 if step.get('beep'): buzzer.stop()
+                buzzer.bleep()
             case _:
                 raise Exception('Invalid action.')
+
+def promptUser_scanMethod():
+    return inquirer.prompt([
+        inquirer.List('method',
+            message="Which scanning method would you like to use?",
+            choices=[
+                'Simple',
+                'GDH'
+            ],
+        ),
+    ])['method']
+
+def promptUser_outputDirectory():
+    print('[?] Choose a directory for storing images.')
+
+    while True:
+        result = subprocess.run(
+            ['zenity', '--file-selection', '--directory', '--title=Select a directory to save images in'],
+            capture_output=True, text=True
+        )
+
+        if result.returncode == 0:
+            path = result.stdout.strip()
+            print(" > {0}\n".format(path))
+            return path
+
+def promptUser_metadata():
+    focalLengthMap = {
+        '8.0mm': '8.0',
+        '16.0mm': '16.0',
+        '25.0mm': '25.0',
+    }
+
+    fNumberMap = {
+        'f/1.4': '1.4',
+        'f/2.1': '2.1',
+        'f/2.8': '2.8',
+        'f/3.4': '3.4',
+        'f/4': '4.0',
+        'f/5.6': '5.6',
+        'f/8': '8.0',
+        'f/16': '16.0'
+    }
+
+    metadata = inquirer.prompt([
+        inquirer.List('EXIF:FocalLength',
+            message="Lens focal length",
+            choices=list(focalLengthMap.keys())
+        ),
+        inquirer.List('EXIF:FNumber',
+            message="Lens F number",
+            choices=list(fNumberMap.keys())
+        ),
+        inquirer.Text('EXIF:LensModel', message="Lens model (Optional)"),
+        inquirer.Text('EXIF:Artist', message="Artist (Optional)"),
+        inquirer.Text('EXIF:Copyright', message="Copyright holder (eg. 'British Museum', leave blank if for personal use)"),
+    ])
+
+    metadata['EXIF:FocalLength'] = focalLengthMap[metadata['EXIF:FocalLength']]
+    metadata['EXIF:FNumber'] = fNumberMap[metadata['EXIF:FNumber']]
+
+    return metadata
 
 if __name__ == '__main__':
     main()
