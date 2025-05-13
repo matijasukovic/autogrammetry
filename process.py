@@ -29,79 +29,11 @@ def on_press():
 
 button.when_pressed = on_press
 
-steps_simple = [
-    {'action': 'move', 'direction': 'up', 'duration': 3.5},
-    {'action': 'capture', 'amount': 32, 'rotation': 0.5},
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-    {'action': 'capture', 'amount': 32, 'rotation': 0.5},
+isHeavyLens = False
 
-    {'action': 'move', 'direction': 'down', 'duration': 1.2},
-    {'action': 'capture', 'amount': 64, 'rotation': 1},
-
-    {'action': 'move', 'direction': 'down', 'duration': 1.2},
-    {'action': 'capture', 'amount': 64, 'rotation': 1},
-
-    {'action': 'move', 'direction': 'down', 'duration': 1},
-    {'action': 'capture', 'amount': 64, 'rotation': 1},
-
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-
-    {'action': 'move', 'direction': 'up', 'duration': 3.5},
-    {'action': 'capture', 'amount': 64, 'rotation': 1},
-
-    {'action': 'move', 'direction': 'down', 'duration': 1.2},
-    {'action': 'capture', 'amount': 64, 'rotation': 1},
-
-    {'action': 'move', 'direction': 'down', 'duration': 1.2},
-    {'action': 'capture', 'amount': 64, 'rotation': 1},
-
-    {'action': 'move', 'direction': 'down', 'duration': 1},
-    {'action': 'capture', 'amount': 64, 'rotation': 1},
-]
-
-steps_gdh = [
-    {'action': 'move', 'direction': 'up', 'duration': 3.3},
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-
-    {'action': 'move', 'direction': 'down', 'duration': 2.5},
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-
-    {'action': 'move', 'direction': 'up', 'duration': 2.5},
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-
-    {'action': 'move', 'direction': 'down', 'duration': 2.5},
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-
-    {'action': 'move', 'direction': 'down', 'duration': 0.8},
-    {'action': 'move', 'direction': 'up', 'duration': 0.1},
-
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-    {'action': 'wait', 'beep': True},
-    {'action': 'wait', 'beep': False},
-
-    {'action': 'capture', 'amount': 48, 'rotation': 1},
-]
 
 def main():
+
     camera.move('down', duration=3.75)
 
     print('Welcome to Autogrammetry v1.0!')
@@ -115,7 +47,91 @@ def main():
     metadata = promptUser_metadata()
     camera.setMetadata(metadata)
     
-    print('Ready to start!')
+    print('All set, starting scan sequence.')
+
+    steps_simple = [
+        {'action': 'move', 'direction': 'up', 'duration': 4 if isHeavyLens else 3.3},
+
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 32, 'rotation': 0.5},
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+        {'action': 'capture', 'amount': 32, 'rotation': 0.5},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'up', 'duration': 3.4 if isHeavyLens else 3},
+
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+    ]
+
+    steps_gdh = [
+        {'action': 'move', 'direction': 'up', 'duration': 3.3},
+        {'action': 'print', 'message': 'Position the object and scale bar on the turntable.'},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 2.3},
+        {'action': 'print', 'message': 'Please remove the scale bar.'},
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'up', 'duration': 2.7},
+        {'action': 'print', 'message': 'Flip the object upside-down.'},
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 2.3},
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1.5},
+        {'action': 'print', 'message': 'Prop the object upright 90 degrees.'},
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+        {'action': 'print', 'message': 'Rotate the object clockwise 90 degrees. (1/3)'},
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+        {'action': 'print', 'message': 'Rotate the object clockwise 90 degrees. (2/3)'},
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+        {'action': 'print', 'message': 'Rotate the object clockwise 90 degrees. (3/3)'},
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 48, 'rotation': 1},
+        {'action': 'print', 'message': 'Scanning complete.'}
+    ]
 
     match scan_method:
         case 'Simple':
@@ -135,9 +151,8 @@ def main():
                 stepperMotor_totalSteps = int(turntable.fullRotationPosition * step.get('rotation'))
                 stepperMotor_stepsPerImage = int(stepperMotor_totalSteps / step.get('amount'))
 
-                print('total steps, ', stepperMotor_totalSteps)
-                print('per image: ', stepperMotor_stepsPerImage)
-
+                counter = 0
+                print("Taking images... {0}/{1}".format(counter, step.get('amount')), end="\r", flush=True)
 
                 for stepperMotor_currentStep in range(0, stepperMotor_totalSteps, stepperMotor_stepsPerImage):
                     while turntable.running.is_set():
@@ -149,11 +164,15 @@ def main():
                         if cv2.waitKey(1) & 0xFF == ord('q'):
                             break
             
-                    sleep(0.1)
+                    sleep(0.5)
                     camera.captureAndSave(raw=True, output_dir=outputDirectory)
+
+                    counter = counter + 1
+                    print("Taking images... {0}/{1}".format(counter, step.get('amount')), end="\r", flush=True)
 
                     if stepperMotor_currentStep != stepperMotor_totalSteps:
                         turntable.startMotorStep(number_of_steps=stepperMotor_stepsPerImage, direction=1)
+
             case 'wait':
                 if step.get('beep'): buzzer.play() 
                 else: buzzer.stop()
@@ -171,6 +190,8 @@ def main():
 
                 if step.get('beep'): buzzer.stop()
                 buzzer.bleep()
+            case 'print':
+                print(step.get('message'))
             case _:
                 raise Exception('Invalid action.')
 
@@ -231,6 +252,7 @@ def promptUser_metadata():
         'f/4': '4.0',
         'f/5.6': '5.6',
         'f/8': '8.0',
+        'f/12': '12.0',
         'f/16': '16.0'
     }
 
@@ -251,7 +273,13 @@ def promptUser_metadata():
     metadata['EXIF:FocalLength'] = focalLengthMap[metadata['EXIF:FocalLength']]
     metadata['EXIF:FNumber'] = fNumberMap[metadata['EXIF:FNumber']]
 
+    global isHeavyLens
+    if metadata['EXIF:FocalLength'] == '16.0':
+        isHeavyLens = True
+        print('tesko jebote')
+
     return metadata
 
 if __name__ == '__main__':
     main()
+    sleep(5)
