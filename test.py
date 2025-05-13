@@ -18,12 +18,12 @@ def on_press(key):
     elif key == Key.down:
         camera.move('down', duration=0.5)
     elif key == Key.left:
-        if turntable.running and turntable.direction == -1:
+        if turntable.running.is_set() and turntable.direction == -1:
             turntable.stopMotor()
         else:
             turntable.startMotorContinuous(direction = 1)
     elif key == Key.right:
-        if turntable.running and turntable.direction == 1:
+        if turntable.running.is_set() and turntable.direction == 1:
             turntable.stopMotor()
         else:
             turntable.startMotorContinuous(direction = -1)
