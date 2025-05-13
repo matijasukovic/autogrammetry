@@ -24,12 +24,13 @@ class Camera:
         self.still_config = self.picamera.create_still_configuration(
             raw={"size": (4056, 3040)},
         )
-        self.custom_controls = {'ExposureTime': 19000, 'AnalogueGain': 1.0, 'Contrast': 1.0, 'Sharpness': 1.0, 'Saturation': 1.0, 'AwbMode': 0}
         
         self.picamera.configure(self.still_config)
-        self.picamera.set_controls(self.custom_controls)
 
         self.picamera.start()
+
+        self.custom_controls = {'ExposureTime': 100000, 'AnalogueGain': 1.0}
+        self.picamera.set_controls(self.custom_controls)
 
         self.savedImage_filename = 'image'
         self.savedImage_index = 0
