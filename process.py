@@ -108,6 +108,8 @@ def main():
 
     scan_method = promptUser_scanMethod()
 
+    image_format = promptUser_imageFormat()
+
     outputDirectory = promptUser_outputDirectory()
 
     metadata = promptUser_metadata()
@@ -121,7 +123,7 @@ def main():
         case 'GDH':
             steps = steps_gdh
         case _:
-            raise Exception("I don't even remember how I got here")
+            raise Exception("Unknown scanning mode.")
 
 
     for step in steps:
@@ -196,6 +198,23 @@ def promptUser_outputDirectory():
             path = result.stdout.strip()
             print(" > {0}\n".format(path))
             return path
+
+def promptUser_imageFormat():
+    formatMap = {
+        'JPG': 'jpg',
+        'RAW (12-bit DNG)': 'dng',
+    }
+
+    prompt = inquirer.prompt([
+        inquirer.List('formatKey',
+            message="Choose an image format.",
+            choices=list(formatMap.keys())
+        ),
+    ])
+
+    chosenKey = prompt['formatKey']
+
+    return formatMap[chosenKey]
 
 def promptUser_metadata():
     focalLengthMap = {
