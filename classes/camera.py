@@ -33,7 +33,6 @@ class Camera:
 
         self.savedImage_filename = 'image'
         self.savedImage_index = 0
-        self.savedImage_extension = '.png'
 
         self.metadataEditQueue = Queue()
         self.metadataEditWorker = Process(target=self.exif_worker, args=(self.metadataEditQueue, self.metadata), daemon=True)
@@ -42,15 +41,12 @@ class Camera:
         img = self.picamera.capture_array()
         return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-    def captureAndSave(self, output_dir='.', raw=False):
-        extension = '.dng' if raw else self.savedImage_extension
+    def captureAndSave(self, output_dir='.', raw=False, image_format='jpg'):
             
-        filename = self.savedImage_filename + '_' + str(self.savedImage_index) + extension
+        filename = "{0}_{1}.{2}".format(self.savedImage_filename, str(self.savedImage_index), image_format)
         save_path = os.path.join(output_dir, filename)
 
-        self.picamera.capture_file(save_path, 'raw' if raw else None) 
-
-        print('saved as: ' ,save_path) 
+        self.picamera.capture_file(save_path, 'raw' if image_format == 'dng' else None) 
 
         self.savedImage_index += 1
         self.metadataEditQueue.put(save_path)
