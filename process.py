@@ -164,8 +164,8 @@ def main():
                         if cv2.waitKey(1) & 0xFF == ord('q'):
                             break
             
-                    sleep(0.5)
-                    camera.captureAndSave(raw=True, output_dir=outputDirectory)
+                    sleep(0.25)
+                    camera.captureAndSave(format=image_format, output_dir=outputDirectory)
 
                     counter = counter + 1
                     print("Taking images... {0}/{1}".format(counter, step.get('amount')), end="\r", flush=True)

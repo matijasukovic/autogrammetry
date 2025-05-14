@@ -29,7 +29,7 @@ class Camera:
 
         self.picamera.start()
 
-        self.custom_controls = {'ExposureTime': 100000, 'AnalogueGain': 1.0}
+        self.custom_controls = {'ExposureTime': 120000, 'AnalogueGain': 1.0}
         self.picamera.set_controls(self.custom_controls)
 
         self.savedImage_filename = 'image'
@@ -42,12 +42,12 @@ class Camera:
         img = self.picamera.capture_array()
         return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-    def captureAndSave(self, output_dir='.', raw=False, image_format='jpg'):
+    def captureAndSave(self, output_dir='.', format='jpg'):
             
-        filename = "{0}_{1}.{2}".format(self.savedImage_filename, str(self.savedImage_index), image_format)
+        filename = "{0}_{1}.{2}".format(self.savedImage_filename, str(self.savedImage_index), format)
         save_path = os.path.join(output_dir, filename)
 
-        self.picamera.capture_file(save_path, 'raw' if image_format == 'dng' else None) 
+        self.picamera.capture_file(save_path, 'raw' if format == 'dng' else None) 
 
         self.savedImage_index += 1
         self.metadataEditQueue.put(save_path)
