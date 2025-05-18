@@ -222,13 +222,13 @@ def promptUser_outputDirectory():
 
 def promptUser_imageFormat():
     formatMap = {
-        'JPG': 'jpg',
         'RAW (12-bit DNG)': 'dng',
+        'JPG': 'jpg',
     }
 
     prompt = inquirer.prompt([
         inquirer.List('formatKey',
-            message="Choose an image format.",
+            message="Choose an image format",
             choices=list(formatMap.keys())
         ),
     ])
