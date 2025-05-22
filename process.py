@@ -7,6 +7,7 @@ import cv2
 from threading import Event
 import inquirer
 import subprocess
+import os
 
 
 # Camera setup
@@ -43,6 +44,7 @@ def main():
     image_format = promptUser_imageFormat()
 
     outputDirectory = promptUser_outputDirectory()
+    subdirectory = None
 
     metadata = promptUser_metadata()
     camera.setMetadata(metadata)
@@ -72,6 +74,43 @@ def main():
 
         {'action': 'wait', 'beep': True},
         {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+    ]
+
+    steps_markers = [
+        {'action': 'subdirectory', 'name': 'top'},
+
+        {'action': 'move', 'direction': 'up', 'duration': 4 if isHeavyLens else 3.3},
+
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'down', 'duration': 1},
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'move', 'direction': 'up', 'duration': 3.4 if isHeavyLens else 3},
+
+        {'action': 'wait', 'beep': True},
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'subdirectory', 'name': 'bottom'},
 
         {'action': 'capture', 'amount': 64, 'rotation': 1},
 
@@ -136,6 +175,8 @@ def main():
     match scan_method:
         case 'Simple':
             steps = steps_simple
+        case 'Markers':
+            steps = steps_markers
         case 'GDH':
             steps = steps_gdh
         case _:
@@ -165,7 +206,7 @@ def main():
                             break
             
                     sleep(0.25)
-                    camera.captureAndSave(format=image_format, output_dir=outputDirectory)
+                    camera.captureAndSave(format = image_format, output_dir = outputDirectory if not subdirectory else subdirectory)
 
                     counter = counter + 1
                     print("Taking images... {0}/{1}".format(counter, step.get('amount')), end="\r", flush=True)
@@ -190,8 +231,16 @@ def main():
 
                 if step.get('beep'): buzzer.stop()
                 buzzer.bleep()
+
             case 'print':
                 print(step.get('message'))
+
+            case 'subdirectory':
+                subdirectory_name = step.get('name')
+                subdirectory = os.path.join(outputDirectory, subdirectory_name) if subdirectory_name else None
+
+                os.makedirs(subdirectory, exist_ok=True)
+
             case _:
                 raise Exception('Invalid action.')
 
@@ -201,6 +250,7 @@ def promptUser_scanMethod():
             message="Which scanning method would you like to use?",
             choices=[
                 'Simple',
+                'Markers',
                 'GDH'
             ],
         ),
@@ -276,7 +326,6 @@ def promptUser_metadata():
     global isHeavyLens
     if metadata['EXIF:FocalLength'] == '16.0':
         isHeavyLens = True
-        print('tesko jebote')
 
     return metadata
 
