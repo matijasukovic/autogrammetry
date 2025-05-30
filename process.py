@@ -52,7 +52,7 @@ def main():
     print('All set, starting scan sequence.')
 
     steps_simple = [
-        {'action': 'move', 'direction': 'up', 'duration': 3.8 if isHeavyLens else 3.3},
+        {'action': 'move', 'direction': 'up', 'duration': 3.9 if isHeavyLens else 3.3},
 
         {'action': 'wait', 'beep': False},
 
