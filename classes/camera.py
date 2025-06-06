@@ -5,12 +5,18 @@ from classes.continuous_servo import ContinuousServo
 import exiftool
 from multiprocessing import Process, Queue
 from datetime import datetime
+from time import sleep
 
 class Camera:
     def __init__(self):
         self.servo = ContinuousServo(pin=17)
         self.SERVO_UP_SPEED = 0.75
         self.SERVO_DOWN_SPEED = -0.45
+
+        self.COLOUR_GAINS_FOLDIO2PLUS = (3.0880589485168457, 1.4724000692367554)
+
+        self.savedImage_filename = 'image'
+        self.savedImage_index = 0
 
         self.metadata = {
             "EXIF:Manufacturer": "RaspberryPi",
@@ -29,11 +35,17 @@ class Camera:
 
         self.picamera.start()
 
-        self.custom_controls = {'ExposureTime': 120000, 'AnalogueGain': 1.0}
-        self.picamera.set_controls(self.custom_controls)
+        print(type(self.COLOUR_GAINS_FOLDIO2PLUS))
 
-        self.savedImage_filename = 'image'
-        self.savedImage_index = 0
+        self.custom_controls = {
+            'ExposureTime': 120000, 
+            'AnalogueGain': 1.0, 
+            'AwbEnable': False,
+            'ColourGains': self.COLOUR_GAINS_FOLDIO2PLUS
+        }
+
+        sleep(2)
+        self.picamera.set_controls(self.custom_controls)
 
         self.metadataEditQueue = Queue()
         self.metadataEditWorker = Process(target=self.exif_worker, args=(self.metadataEditQueue, self.metadata), daemon=True)
