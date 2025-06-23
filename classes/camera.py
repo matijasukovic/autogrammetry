@@ -32,6 +32,8 @@ class Camera:
         )
         self.picamera.configure(self.still_config)
 
+        self.picamera.options['quality'] = 100
+
         self.picamera.start()
 
         self.custom_controls = {
@@ -55,7 +57,11 @@ class Camera:
         filename = "{0}_{1}.{2}".format(self.savedImage_filename, str(self.savedImage_index), format)
         save_path = os.path.join(output_dir, filename)
 
-        self.picamera.capture_file(save_path, 'raw' if format == 'dng' else None, quality=100) 
+        if format == 'dng':
+            self.picamera.capture_file(save_path, 'raw')
+        else:
+            self.picamera.capture_file(save_path)
+
 
         self.savedImage_index += 1
         self.metadataEditQueue.put(save_path)
