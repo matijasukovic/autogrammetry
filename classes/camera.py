@@ -32,8 +32,6 @@ class Camera:
         )
         self.picamera.configure(self.still_config)
 
-        self.picamera.options['quality'] = 100
-
         self.picamera.start()
 
         self.custom_controls = {
