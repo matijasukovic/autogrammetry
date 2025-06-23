@@ -35,8 +35,6 @@ class Camera:
 
         self.picamera.start()
 
-        print(type(self.COLOUR_GAINS_FOLDIO2PLUS))
-
         self.custom_controls = {
             'ExposureTime': 120000, 
             'AnalogueGain': 1.0, 
@@ -44,7 +42,6 @@ class Camera:
             'ColourGains': self.COLOUR_GAINS_FOLDIO2PLUS
         }
 
-        sleep(2)
         self.picamera.set_controls(self.custom_controls)
 
         self.metadataEditQueue = Queue()
