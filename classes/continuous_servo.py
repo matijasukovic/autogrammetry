@@ -1,5 +1,6 @@
 from gpiozero import Servo
-from gpiozero.pins.pigpio import PiGPIOFactory, RPiGPIOFactory
+from gpiozero.pins.pigpio import PiGPIOFactory
+from gpiozero.pins.rpigpio import RPiGPIOFactory
 from time import sleep
 
 class ContinuousServo:
