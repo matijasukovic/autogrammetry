@@ -1,12 +1,14 @@
 from gpiozero import Servo
-from gpiozero.pins.pigpio import PiGPIOFactory
+from gpiozero.pins.pigpio import PiGPIOFactory, RPiGPIOFactory
 from time import sleep
 
 class ContinuousServo:
     def __init__(self, pin=17):
         self.speed = 0
+        print('Detected Raspberry Pi model:', self.detectRaspberryPiModel())
 
-        factory = PiGPIOFactory()
+        # PiGPIOFactory uses pigpio, which can do hardware PWM on pi4, reducing servo jitter. Pi 5 doesn't support this due to new chip architecture.
+        factory = RPiGPIOFactory() if 'Raspberry Pi 5' in self.detectRaspberryPiModel() else PiGPIOFactory()
 
         # Defaults are 1/1000 and 2/2000
         minimumPulseWidth = 0.5/1000
@@ -30,4 +32,10 @@ class ContinuousServo:
         self.setSpeed(speed)
         sleep(duration)
         self.setSpeed(0)
+
+
+    def detectRaspberryPiModel() -> str:
+        with open('/proc/device-tree/model') as f:
+            model = f.read()
+        return model
     
