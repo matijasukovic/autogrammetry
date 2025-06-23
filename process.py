@@ -43,8 +43,7 @@ def main():
 
     image_format = promptUser_imageFormat()
 
-    outputDirectory = promptUser_outputDirectory()
-    subdirectory = None
+    output_directory = promptUser_outputDirectory()
 
     metadata = promptUser_metadata()
     camera.setMetadata(metadata)
@@ -172,6 +171,16 @@ def main():
         {'action': 'print', 'message': 'Scanning complete.'}
     ]
 
+    steps_manual = [
+        {'action': 'wait', 'beep': False},
+
+        {'action': 'capture', 'amount': 64, 'rotation': 1},
+
+        {'action': 'wait', 'beep': True},
+
+        {'action': 'loop'}
+    ]
+
     match scan_method:
         case 'Simple':
             steps = steps_simple
@@ -179,9 +188,16 @@ def main():
             steps = steps_markers
         case 'GDH':
             steps = steps_gdh
+        case 'Manual':
+            steps = steps_manual
         case _:
             raise Exception("Unknown scanning mode.")
 
+    executeSteps(steps, image_format, output_directory)
+    
+
+def executeSteps(steps, image_format, output_directory):
+    subdirectory = None
 
     for step in steps:
         match step.get('action'):
@@ -206,7 +222,7 @@ def main():
                             break
             
                     sleep(0.25)
-                    camera.captureAndSave(format = image_format, output_dir = outputDirectory if not subdirectory else subdirectory)
+                    camera.captureAndSave(format = image_format, output_dir = output_directory if not subdirectory else subdirectory)
 
                     counter = counter + 1
                     print("Taking images... {0}/{1}".format(counter, step.get('amount')), end="\r", flush=True)
@@ -237,9 +253,12 @@ def main():
 
             case 'subdirectory':
                 subdirectory_name = step.get('name')
-                subdirectory = os.path.join(outputDirectory, subdirectory_name) if subdirectory_name else None
+                subdirectory = os.path.join(output_directory, subdirectory_name) if subdirectory_name else None
 
                 os.makedirs(subdirectory, exist_ok=True)
+            
+            case 'loop':
+                executeSteps(steps, image_format, output_directory)
 
             case _:
                 raise Exception('Invalid action.')
@@ -251,7 +270,8 @@ def promptUser_scanMethod():
             choices=[
                 'Simple',
                 'Markers',
-                'GDH'
+                'GDH',
+                'Manual'
             ],
         ),
     ])['method']
