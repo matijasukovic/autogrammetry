@@ -1,7 +1,7 @@
 from picamera2 import Picamera2
 import cv2
 import os
-from classes.continuous_servo import ContinuousServo
+from classes.continuousServo import ContinuousServo
 import exiftool
 from multiprocessing import Process, Queue
 from datetime import datetime
@@ -30,8 +30,9 @@ class Camera:
         self.still_config = self.picamera.create_still_configuration(
             raw={"size": (4056, 3040)},
         )
-        
         self.picamera.configure(self.still_config)
+
+        self.picamera.options['quality'] = 100
 
         self.picamera.start()
 
@@ -56,7 +57,7 @@ class Camera:
         filename = "{0}_{1}.{2}".format(self.savedImage_filename, str(self.savedImage_index), format)
         save_path = os.path.join(output_dir, filename)
 
-        self.picamera.capture_file(save_path, 'raw' if format == 'dng' else None) 
+        self.picamera.capture_file(save_path, 'raw' if format == 'dng' else None, quality=100) 
 
         self.savedImage_index += 1
         self.metadataEditQueue.put(save_path)

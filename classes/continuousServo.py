@@ -35,7 +35,7 @@ class ContinuousServo:
         self.setSpeed(0)
 
 
-    def detectRaspberryPiModel() -> str:
+    def detectRaspberryPiModel(self) -> str:
         with open('/proc/device-tree/model') as f:
             model = f.read()
         return model
