@@ -28,7 +28,7 @@ def on_press(key):
         else:
             turntable.startMotorContinuous(direction = -1)
     elif key == Key.space:
-        camera.captureAndSave(raw=True)
+        camera.captureAndSave(format='dng')
 
 def main():
     listener = Listener(on_press=on_press)
